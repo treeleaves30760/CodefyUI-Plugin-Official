@@ -1,0 +1,68 @@
+# cdui.plugin.toml — manifest for a CodefyUI plugin pack.
+#
+# This is the *official starter template*. Fork the repo on GitHub, edit
+# the fields below to describe your plugin, and your users will install
+# it with `cdui plugin install <your-username>/<your-fork>`.
+#
+# Reference: https://github.com/treeleaves30760/CodefyUI#plugin-packs
+
+[plugin]
+# REQUIRED. Globally-unique lowercase kebab-case identifier. This is also
+# the install-directory name AND part of the Python import path
+# (`cdui_plugins.<id_with_underscores>`), so pick something stable.
+id              = "official-template"
+
+# REQUIRED. Display name shown in `cdui plugin list` and the plugin
+# manager UI.
+name            = "CodefyUI Plugin — Official Template"
+
+# REQUIRED. Semantic version. Bump on every release.
+version         = "0.1.0"
+
+# REQUIRED. One-paragraph description — surfaced by `cdui plugin info`
+# and `cdui plugin search`.
+description     = "Working starter template for CodefyUI plugin authors. Two example nodes (HelloPlugin + MovingAverage), a preset, an example workflow, an asset file, and a sample test suite — fork it, replace the nodes with yours, push, and your users install it with `cdui plugin install <your-org>/<your-repo>`."
+
+# REQUIRED. Format version of cdui.plugin.toml itself. Currently 1.
+# CodefyUI rejects unknown schema_version on install.
+schema_version  = 1
+
+# REQUIRED. Backend version this plugin needs (PEP 440 specifier).
+# Aim at the lowest CodefyUI version you've actually tested against.
+requires_codefyui = ">=0.2.0"
+
+# OPTIONAL. Free-text fields shown by `cdui plugin info`.
+authors         = ["CodefyUI <team@codefyui.dev>"]
+license         = "MIT"
+homepage        = "https://github.com/treeleaves30760/CodefyUI-Plugin-Official"
+
+[content]
+# Where the plugin's content lives, relative to this manifest. Defaults
+# shown — only override if you want a non-standard layout.
+nodes_dir       = "nodes"
+presets_dir     = "presets"
+examples_dir    = "examples"
+assets_dir      = "assets"
+
+# OPTIONAL. Extra Python packages installed via `uv pip install` into the
+# CodefyUI venv during install. Use sparingly — every dep you declare is
+# a potential conflict with another plugin. Common form:
+#
+#   [python_deps]
+#   numpy = ">=1.24"
+#   sentence-transformers = ">=2.7.0"
+
+# OPTIONAL. Cross-link the textbook or any external lesson series. The
+# values are pure metadata — surfaced by `cdui plugin info` and node
+# tooltips so students can find the right pack for their current chapter.
+[lessons]
+chapters = []
+lessons  = []
+
+# OPTIONAL. The AST validator that runs on every nodes/*.py file before
+# install blocks dangerous imports (os, subprocess, sys, urllib, …) and
+# dynamic builtin calls (exec, __import__, getattr-with-dynamic-name).
+# If your plugin LEGITIMATELY needs one of the banned top-level modules,
+# list it here. Users still have to pass `--trust-author` to accept.
+[security]
+allowed_modules = []
