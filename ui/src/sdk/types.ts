@@ -92,6 +92,26 @@ export interface SerializedGraph {
   [key: string]: unknown;
 }
 
+export interface NodeRenderContext {
+  node: {
+    id: string;
+    type: string;
+    params: Record<string, unknown>;
+    definition?: unknown;
+  };
+}
+
+/**
+ * Imperative renderer for a node's card body. The SDK's `defineNodeRenderer`
+ * adapts a React component to this shape; the host calls mount once, update on
+ * param changes, and unmount when the node is removed.
+ */
+export interface PluginNodeRenderer {
+  mount(container: HTMLElement, ctx: NodeRenderContext): void;
+  update?(container: HTMLElement, ctx: NodeRenderContext): void;
+  unmount?(container: HTMLElement): void;
+}
+
 /** The object the editor hands every plugin frontend at activation. */
 export interface CodefyUIPluginAPI {
   apiVersion: number;
@@ -107,6 +127,10 @@ export interface CodefyUIPluginAPI {
     /** Synchronous — returns the result directly, committed as one undo step. */
     applyOperations(ops: GraphOp[]): ApplyResult;
     onGraphChanged(cb: () => void): () => void;
+  };
+  /** Custom node renderers — requires apiVersion >= 2. */
+  nodes: {
+    registerRenderer(nodeType: string, renderer: PluginNodeRenderer): () => void;
   };
   http: {
     /** Browser `fetch`, with the CodefyUI session token attached. */

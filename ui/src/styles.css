@@ -39,3 +39,26 @@
 .cdui-example__btn:hover {
   background: #0f766e;
 }
+
+/* Custom node body (api.nodes.registerRenderer) */
+.cdui-node-body {
+  padding: 6px 8px;
+  font: 12px/1.4 system-ui, -apple-system, sans-serif;
+  color: #cde9e4;
+}
+
+.cdui-node-body__title {
+  font-weight: 600;
+  color: #2dd4bf;
+  margin-bottom: 4px;
+}
+
+.cdui-node-body__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cdui-node-body__row b {
+  color: #fff;
+}

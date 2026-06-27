@@ -9,10 +9,11 @@
  * on their own React root inside the editor.
  */
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, type Root } from 'react-dom/client';
 import type {
   ActivateFn, ApplyResult, CodefyUIPluginAPI, GraphOp,
-  NodeDefinition, SerializedGraph, ToastType,
+  NodeDefinition, NodeRenderContext, PluginNodeRenderer,
+  SerializedGraph, ToastType,
 } from './types';
 
 const ApiContext = React.createContext<CodefyUIPluginAPI | null>(null);
@@ -42,20 +43,60 @@ export interface ToolOptions {
  * export default defineTool({ id: 'my-panel', title: 'My Panel' }, MyPanel);
  * ```
  */
+export function mountTool(
+  api: CodefyUIPluginAPI,
+  opts: ToolOptions,
+  Component: React.ComponentType<{ api: CodefyUIPluginAPI }>,
+): void {
+  const el = api.ui.addFloatingWidget({ id: opts.id });
+  if (opts.title) el.setAttribute('aria-label', opts.title);
+  createRoot(el).render(
+    <React.StrictMode>
+      <ApiContext.Provider value={api}>
+        <Component api={api} />
+      </ApiContext.Provider>
+    </React.StrictMode>,
+  );
+}
+
 export function defineTool(
   opts: ToolOptions,
   Component: React.ComponentType<{ api: CodefyUIPluginAPI }>,
 ): ActivateFn {
-  return (api) => {
-    const el = api.ui.addFloatingWidget({ id: opts.id });
-    if (opts.title) el.setAttribute('aria-label', opts.title);
-    createRoot(el).render(
-      <React.StrictMode>
-        <ApiContext.Provider value={api}>
-          <Component api={api} />
-        </ApiContext.Provider>
-      </React.StrictMode>,
-    );
+  return (api) => mountTool(api, opts, Component);
+}
+
+/**
+ * Adapt a React component into a node-body renderer for
+ * `api.nodes.registerRenderer`. The component receives the live node context
+ * (id, type, params) and re-renders whenever the node's params change.
+ *
+ * ```tsx
+ * api.nodes.registerRenderer('my_plugin:MyNode', defineNodeRenderer(MyBody));
+ * ```
+ */
+export function defineNodeRenderer(
+  Component: React.ComponentType<{ node: NodeRenderContext['node'] }>,
+): PluginNodeRenderer {
+  const roots = new WeakMap<HTMLElement, Root>();
+  const render = (el: HTMLElement, ctx: NodeRenderContext) => {
+    let root = roots.get(el);
+    if (!root) {
+      root = createRoot(el);
+      roots.set(el, root);
+    }
+    root.render(<Component node={ctx.node} />);
+  };
+  return {
+    mount: render,
+    update: render,
+    unmount: (el) => {
+      const root = roots.get(el);
+      if (root) {
+        root.unmount();
+        roots.delete(el);
+      }
+    },
   };
 }
 

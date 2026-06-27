@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, act, cleanup } from '@testing-library/react';
 import {
-  defineTool, useGraph, useToast, useStorage,
+  defineTool, defineNodeRenderer, useGraph, useToast, useStorage,
 } from './index';
 import type { CodefyUIPluginAPI, SerializedGraph } from './index';
 
@@ -32,6 +32,7 @@ function makeFakeApi() {
       applyOperations: vi.fn(() => ({ results: [], refs: {}, node_count: 0, edge_count: 0 })),
       onGraphChanged: (cb) => { listeners.add(cb); return () => { listeners.delete(cb); }; },
     },
+    nodes: { registerRenderer: () => () => {} },
     http: { fetch: vi.fn(async () => new Response('ok')) },
     storage: {
       get: (k) => window.localStorage.getItem(k),
@@ -101,5 +102,25 @@ describe('hooks', () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(() => render(<Bare />)).toThrow(/defineTool/);
     spy.mockRestore();
+  });
+});
+
+describe('defineNodeRenderer', () => {
+  it('mounts, updates on new context, and unmounts a React node body', () => {
+    const renderer = defineNodeRenderer(({ node }) => (
+      <span data-testid="nb">{String(node.params.v)}</span>
+    ));
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    const ctx = (v: unknown) => ({ node: { id: 'n', type: 'p:Foo', params: { v } } });
+
+    act(() => { renderer.mount(el, ctx(1)); });
+    expect(el.querySelector('[data-testid="nb"]')?.textContent).toBe('1');
+
+    act(() => { renderer.update!(el, ctx(2)); });
+    expect(el.querySelector('[data-testid="nb"]')?.textContent).toBe('2');
+
+    act(() => { renderer.unmount!(el); });
+    expect(el.querySelector('[data-testid="nb"]')).toBeNull();
   });
 });
