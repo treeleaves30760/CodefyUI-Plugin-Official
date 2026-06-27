@@ -1,0 +1,41 @@
+.cdui-example {
+  width: 240px;
+  padding: 12px 14px;
+  background: #1e1e1e;
+  color: #e6e6e6;
+  border: 1px solid #333;
+  border-radius: 8px;
+  font: 13px/1.5 system-ui, -apple-system, sans-serif;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.cdui-example__title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #2dd4bf;
+}
+
+.cdui-example__row {
+  margin: 2px 0;
+  color: #b8b8b8;
+}
+
+.cdui-example__row b {
+  color: #e6e6e6;
+}
+
+.cdui-example__btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 6px 10px;
+  background: #0d9488;
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.cdui-example__btn:hover {
+  background: #0f766e;
+}
