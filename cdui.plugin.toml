@@ -29,7 +29,8 @@ schema_version  = 1
 
 # REQUIRED. Backend version this plugin needs (PEP 440 specifier).
 # Aim at the lowest CodefyUI version you've actually tested against.
-requires_codefyui = ">=0.2.0"
+# Frontend extensions (the [frontend] section + the ui/ React app) need >= 1.3.0.
+requires_codefyui = ">=1.3.0"
 
 # OPTIONAL. Free-text fields shown by `cdui plugin info`.
 authors         = ["CodefyUI <team@codefyui.dev>"]
@@ -43,6 +44,13 @@ nodes_dir       = "nodes"
 presets_dir     = "presets"
 examples_dir    = "examples"
 assets_dir      = "assets"
+
+# OPTIONAL. Ship a frontend extension — a JS bundle the editor imports and whose
+# default export it calls as activate(api). Author it as a React app in ui/ and
+# build with `cd ui && pnpm install && pnpm build`, which emits frontend/index.js
+# (commit that built file). The path must be relative and live under frontend/.
+[frontend]
+entry = "frontend/index.js"
 
 # OPTIONAL. Extra Python packages installed via `uv pip install` into the
 # CodefyUI venv during install. Use sparingly — every dep you declare is

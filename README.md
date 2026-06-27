@@ -150,6 +150,52 @@ See [`nodes/moving_average_node.py`](./nodes/moving_average_node.py) for a runna
 
 ---
 
+## Frontend UI (React)
+
+Plugins can add editor UI — a floating tool panel — written in **React + TypeScript**, not a hand-written `index.js`. The React app lives in [`ui/`](./ui) and builds to a single `frontend/index.js` bundle that the editor imports.
+
+```bash
+cd ui
+pnpm install
+pnpm build        # emits ../frontend/index.js (commit it)
+pnpm dev          # rebuild on every change — pair with `cdui plugin dev`
+```
+
+The manifest points at the built bundle:
+
+```toml
+[frontend]
+entry = "frontend/index.js"
+```
+
+Your entry is a React component wrapped with `defineTool`:
+
+```tsx
+// ui/src/index.tsx
+import { defineTool, useGraph, useToast } from './sdk';
+
+function Panel() {
+  const graph = useGraph();                 // re-renders on graph changes
+  const toast = useToast();
+  return <button onClick={() => toast(`${graph.nodes.length} nodes`)}>Count</button>;
+}
+
+export default defineTool({ id: 'my-panel', title: 'My Panel' }, Panel);
+```
+
+The typed SDK is vendored in [`ui/src/sdk/`](./ui/src/sdk) (clone-and-own):
+
+- **Types** — `CodefyUIPluginAPI`, `GraphOp`, `NodeDefinition`, … mirror the host exactly, so you get full autocomplete instead of copying interfaces by hand.
+- **`defineTool(opts, Component)`** — mounts your component into a floating widget and provides the API to the whole subtree.
+- **Hooks** — `useGraph`, `useNodeDefinitions`, `useGraphChanged`, `useApplyOperations`, `useToast`, `useCodefyFetch`, `useStorage`, plus `useCodefyUI()` for the raw API object.
+- **`defineNodeRenderer(Component)`** — draw a node's card body with React. Register it via `api.nodes.registerRenderer(nodeType, …)` (needs `api.apiVersion >= 2`); the host keeps the title, ports, and params. Node types use the snake_case namespace — plugin `my-plugin` exposes node type `my_plugin:MyNode`. See [`ui/src/MovingAverageNodeBody.tsx`](./ui/src/MovingAverageNodeBody.tsx) and its registration in [`ui/src/index.tsx`](./ui/src/index.tsx).
+
+React is bundled with your plugin, so end users still install with just `cdui plugin install …` — no Node required on their side. Requires CodefyUI **≥ 1.3.0**. While developing, `cdui plugin dev .` (watches `frontend/`) paired with `pnpm dev` (rebuilds on save) hot-reloads both your Python nodes and the panel — no manual browser refresh.
+
+The whole `ui/` folder is optional — delete it (and the `[frontend]` stanza) if your plugin is backend-only.
+
+---
+
 ## AST security gate
 
 CodefyUI runs a strict AST validator on every `nodes/*.py` file before it'll install a third-party plugin from a URL. Blocked by default:
